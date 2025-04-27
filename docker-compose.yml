@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  postgres-db:
+    image: postgres:14-alpine
+    container_name: postgres-db
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - app-network
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-app
+    restart: always
+    environment:
+      PORT: ${PORT}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      CORS_METHODS: ${CORS_METHODS}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST: postgres-db
+      POSTGRES_PORT: 5432
+      JWT_SECRET: ${JWT_SECRET}
+    depends_on:
+      - postgres-db
+    networks:
+      - app-network
+    entrypoint: ["./wait-for-it.sh", "postgres-db", "5432", "--", "pm2-runtime", "ecosystem.config.js"]
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-app
+    restart: always
+    networks:
+      - app-network
+    depends_on:
+      - backend
+    environment:
+      API_URL: http://backend-app:4000  # Взаимодействие с бэкендом через имя контейнера
+
+volumes:
+  postgres_data:
+
+networks:
+  app-network:
+    driver: bridge

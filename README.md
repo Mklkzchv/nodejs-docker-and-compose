@@ -1,3 +1,4 @@
-# Докеризация приложения
 
-Перед тем как приступить к выполнению проектной работы разместите в репозитории исходный код фронтенд и бэкенд частей сервиса КупиПодариДай, реализованного вами ранее. 
+IP адрес 84.252.137.97
+Frontend https://miklekzchv.students.nomorepartiessbs.ru
+Backend https://api.miklekzchv.students.nomorepartiessbs.ru
